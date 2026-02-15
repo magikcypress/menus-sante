@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Mes Menus Santé</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card:hover { transform: translateY(-4px); transition: all 0.3s ease; }
+        .ingredient-tag { cursor: pointer; transition: all 0.2s; }
+        .ingredient-tag:hover { transform: scale(1.05); }
+        .ingredient-tag.selected { ring: 2px; }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container { padding-left: 1rem; padding-right: 1rem; }
+            h1 { font-size: 1.75rem !important; }
+            h2 { font-size: 1.1rem !important; }
+            .season-btn { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+            .card { padding: 0.75rem; }
+            #recetteModal > div { padding: 1rem; max-height: 95vh; }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-green-50 to-amber-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-800 mb-2">
+                <i class="fas fa-leaf text-green-600 mr-2"></i>
+                Mes Menus Santé
+            </h1>
+            <p class="text-gray-600">Recettes de saison équilibrées et savoureuses</p>
+        </header>
+
+        <!-- Navigation saisons -->
+        <nav class="flex justify-center gap-2 mb-6 flex-wrap">
+            <button class="season-btn active bg-green-600 text-white px-4 py-2 rounded-full font-medium transition" data-season="hiver">
+                <i class="fas fa-snowflake mr-1"></i> Hiver
+            </button>
+            <button class="season-btn bg-white text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-pink-100 transition" data-season="printemps">
+                <i class="fas fa-seedling mr-1"></i> Printemps
+            </button>
+            <button class="season-btn bg-white text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-yellow-100 transition" data-season="ete">
+                <i class="fas fa-sun mr-1"></i> Été
+            </button>
+            <button class="season-btn bg-white text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-orange-100 transition" data-season="automne">
+                <i class="fas fa-leaf mr-1"></i> Automne
+            </button>
+        </nav>
+
+        <!-- Rappel produits à éviter -->
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-xl mb-6 text-sm">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-amber-500 mr-3"></i>
+                <span class="text-amber-800">
+                    <strong>Rappel :</strong> Ces menus évitent le pamplemousse, la grenade, le cédrat et le millepertuis.
+                </span>
+            </div>
+        </div>
+
+        <!-- Menu de la semaine -->
+        <section id="menuSemaine" class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-calendar-week text-green-600"></i>
+                </span>
+                Menu de la semaine
+                <span class="ml-3 text-sm font-normal text-gray-500">(Hiver)</span>
+            </h2>
+
+            <div id="menuContent" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            </div>
+        </section>
+
+        <!-- Générateur de recettes -->
+        <section id="generateur" class="mb-8">
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mr-3">
+                        <i class="fas fa-magic text-purple-600"></i>
+                    </span>
+                    Générer une recette
+                </h2>
+
+                <p class="text-gray-600 text-sm mb-4">Sélectionne des ingrédients et je te propose des recettes :</p>
+
+                <div class="mb-4">
+                    <div class="flex flex-wrap gap-2" id="ingredientsList">
+                        <!-- Ingrédients cliquables générés dynamiquement -->
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 sm:gap-3 items-center">
+                    <button id="generateBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 sm:px-6 py-2 rounded-xl transition text-sm sm:text-base">
+                        <i class="fas fa-search mr-1 sm:mr-2"></i> Trouver
+                    </button>
+                    <button id="randomBtn" class="bg-green-100 hover:bg-green-200 text-green-700 font-medium px-3 sm:px-4 py-2 rounded-xl transition text-sm sm:text-base">
+                        <i class="fas fa-dice mr-1 sm:mr-2"></i> Hasard
+                    </button>
+                    <button id="clearBtn" class="text-gray-500 hover:text-gray-700 text-sm">
+                        Effacer
+                    </button>
+                </div>
+
+                <!-- Résultats -->
+                <div id="generateResults" class="hidden mt-6 border-t pt-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">Recettes trouvées :</h3>
+                    <div id="resultsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toutes les recettes -->
+        <section id="recettes" class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <span class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mr-3">
+                        <i class="fas fa-utensils text-orange-600"></i>
+                    </span>
+                    Toutes les recettes
+                    <span id="recetteCount" class="ml-2 text-sm font-normal text-gray-500"></span>
+                </h2>
+                <div class="flex gap-2">
+                    <select id="filterCategorie" class="text-sm border rounded-lg px-3 py-1">
+                        <option value="">Toutes catégories</option>
+                        <option value="entree">Entrées</option>
+                        <option value="plat">Plats</option>
+                        <option value="accompagnement">Accompagnements</option>
+                        <option value="soupe">Soupes</option>
+                        <option value="dessert">Desserts</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="recettesContent" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            </div>
+        </section>
+
+        <!-- Produits de saison -->
+        <section id="courses" class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-shopping-basket text-blue-600"></i>
+                </span>
+                Tous les produits de saison
+            </h2>
+
+            <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                    <div>
+                        <h3 class="font-bold text-green-700 mb-2 sm:mb-3 text-sm sm:text-base"><i class="fas fa-carrot mr-1 sm:mr-2"></i>Légumes</h3>
+                        <ul id="legumes" class="space-y-1 text-gray-600 text-xs sm:text-sm">
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-red-600 mb-2 sm:mb-3 text-sm sm:text-base"><i class="fas fa-apple-alt mr-1 sm:mr-2"></i>Fruits</h3>
+                        <ul id="fruits" class="space-y-1 text-gray-600 text-xs sm:text-sm">
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-blue-600 mb-2 sm:mb-3 text-sm sm:text-base"><i class="fas fa-fish mr-1 sm:mr-2"></i>Poissons</h3>
+                        <ul id="poissons" class="space-y-1 text-gray-600 text-xs sm:text-sm">
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-amber-700 mb-2 sm:mb-3 text-sm sm:text-base"><i class="fas fa-drumstick-bite mr-1 sm:mr-2"></i>Viandes</h3>
+                        <ul id="viandes" class="space-y-1 text-gray-600 text-xs sm:text-sm">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-400 text-sm py-6">
+            <p>Manger sainement, simplement.</p>
+        </footer>
+    </div>
+
+    <!-- Modal recette -->
+    <div id="recetteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="menus.js"></script>
+</body>
+
+</html>
