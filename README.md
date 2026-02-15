@@ -4,6 +4,8 @@ Site de menus de saison avec 135 recettes françaises, des quantités détaillé
 
 **https://menu.rouquin.me**
 
+![Mes Menus Santé](screenshot.png)
+
 ## Fonctionnalités
 
 - **4 saisons** : Hiver, Printemps, Été, Automne
