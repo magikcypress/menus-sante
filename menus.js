@@ -291,7 +291,14 @@
     });
 
     // ==================== ÉTAT ====================
-    let currentSeason = 'hiver';
+    function getSeasonFromDate() {
+        var m = new Date().getMonth() + 1; // 1-12
+        if (m >= 3 && m <= 5) return 'printemps';
+        if (m >= 6 && m <= 8) return 'ete';
+        if (m >= 9 && m <= 11) return 'automne';
+        return 'hiver';
+    }
+    let currentSeason = getSeasonFromDate();
     let selectedIngredients = [];
 
     // ==================== FONCTIONS ====================
@@ -305,18 +312,35 @@
         var container = document.getElementById('ingredientsList');
         while (container.firstChild) container.removeChild(container.firstChild);
 
-        var ingredients = getAllIngredients(season).slice(0, 30);
-        ingredients.forEach(function(ing) {
-            var tag = document.createElement('button');
-            tag.className = 'ingredient-tag px-3 py-1 rounded-full text-sm border transition';
-            if (selectedIngredients.indexOf(ing) >= 0) {
-                tag.classList.add('bg-purple-600', 'text-white', 'border-purple-600');
-            } else {
-                tag.classList.add('bg-white', 'text-gray-700', 'border-gray-300', 'hover:border-purple-400');
-            }
-            tag.textContent = ing;
-            tag.onclick = function() { toggleIngredient(ing); };
-            container.appendChild(tag);
+        var p = produits[season];
+        var categories = [
+            { label: '🥬 Légumes', items: p.legumes.slice(0, 10) },
+            { label: '🍎 Fruits', items: p.fruits.slice(0, 6) },
+            { label: '🐟 Poissons', items: p.poissons.slice(0, 6) },
+            { label: '🥩 Viandes', items: p.viandes }
+        ];
+
+        categories.forEach(function(cat) {
+            var label = document.createElement('div');
+            label.className = 'w-full text-xs font-semibold text-gray-500 uppercase tracking-wide mt-2 mb-1';
+            label.textContent = cat.label;
+            container.appendChild(label);
+
+            var row = document.createElement('div');
+            row.className = 'flex flex-wrap gap-2 w-full';
+            cat.items.forEach(function(ing) {
+                var tag = document.createElement('button');
+                tag.className = 'ingredient-tag px-3 py-1 rounded-full text-sm border transition';
+                if (selectedIngredients.indexOf(ing) >= 0) {
+                    tag.classList.add('bg-purple-600', 'text-white', 'border-purple-600');
+                } else {
+                    tag.classList.add('bg-white', 'text-gray-700', 'border-gray-300', 'hover:border-purple-400');
+                }
+                tag.textContent = ing;
+                tag.onclick = function() { toggleIngredient(ing); };
+                row.appendChild(tag);
+            });
+            container.appendChild(row);
         });
     }
 
@@ -824,8 +848,8 @@
             }
         };
 
-        // Initial render
-        updateSeason('hiver');
+        // Initial render — saison détectée automatiquement selon la date
+        updateSeason(currentSeason);
     }
 
     if (document.readyState === 'loading') {
